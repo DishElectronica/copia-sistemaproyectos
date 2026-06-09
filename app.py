@@ -201,8 +201,11 @@ def registrar_bitacora():
 @app.route('/detalle/<int:id>', methods=['GET', 'POST'])
 def detalle_proyecto(id):
 
+    db.session.expire_all()
+
     proyecto = Proyecto.query.get_or_404(id)
     if not LinkProyecto.query.filter_by(proyecto_id=id).first():
+       
         link_temp = LinkProyecto(proyecto_id=id, nombre_link="PRUEBA", url="https://www.google.com")
         db.session.add(link_temp)
         db.session.commit()
@@ -273,7 +276,6 @@ def actualizar_links_globales():
     db.session.commit()
    
 
-    print(f"DEBUG: URL guardada en BD: {config.url_cotizaciones}") # Mira la terminal
     return redirect(request.referrer or '/')       
 
 @app.route('/agregar_link_proyecto/<int:id>', methods=['POST'])
@@ -296,10 +298,13 @@ def agregar_link_proyecto(id):
 def actualizar_todos_los_links(id):
     links = LinkProyecto.query.filter_by(proyecto_id=id).all()
     
+    
+    
     for link in links:
         # Recuperamos los datos del formulario usando el ID del link
         nuevo_nombre = request.form.get(f'nombre_{link.id}')
         nueva_url = request.form.get(f'url_{link.id}')
+
         
         # Actualizamos solo si los datos existen
         if nuevo_nombre: link.nombre_link = nuevo_nombre
@@ -307,6 +312,7 @@ def actualizar_todos_los_links(id):
         
     db.session.commit()
     return redirect(f'/detalle/{id}')
+    
 
 
 # ... importaciones y db = SQLAlchemy(app) ...
@@ -409,7 +415,7 @@ def exportar_csv():
 @app.route('/exportar_finalizados_csv')
 def exportar_finalizados_csv():
     # Filtramos solo los que están finalizados
-    proyectos = Proyecto.query.filter_by(estado='finalizado').all()
+    proyectos = Proyecto.query.filter_by(estado='archivado').all()
     
     si = io.StringIO()
     writer = csv.writer(si)
@@ -443,4 +449,5 @@ def exportar_finalizados_csv():
         headers={"Content-Disposition": "attachment;filename=reporte_proyectos_finalizados.csv"}
     )
 
-
+if __name__ == '__main__':
+    app.run(debug=True)

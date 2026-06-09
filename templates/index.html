@@ -121,6 +121,11 @@
                         <strong style="display: block;">{{ p.nombre_proyecto }}</strong>
                         <small style="color: #6b7280;">#{{ p.numero_cotizacion or 'S/C' }}</small>
                     </div>
+                    <a href="{{ url_for('finalizar_proyecto', id=p.id) }}" title="Archivar proyecto" 
+                       style="text-decoration: none; font-size: 1.2em; cursor: pointer;">
+                       ✅
+                    </a>
+
                     {% set codigos = {1: 'AX1', 2: 'AX2', 3: 'AX3', 4: 'AX4'} %}
                     <div title="{{ p.encargado.nombre }}" style="background: #e0e7ff; color: #4338ca; width: 35px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75em; border: 1px solid #c7d2fe;">
                         {{ codigos.get(p.encargado.id, '??') }}
