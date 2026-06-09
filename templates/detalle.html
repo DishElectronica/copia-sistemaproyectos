@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalle de Proyecto: {{ proyecto.nombre_proyecto }}</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f8; padding: 20px; color: #333; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid #e1e4e8; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; }
+        .seccion-links { margin: 15px 0; border: 1px solid #e1e4e8; padding: 15px; background-color: #fdfdfd; border-radius: 8px; }
+        input[type="text"], input[type="date"], input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin: 5px 0; }
+        button { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Seguimiento: {{ proyecto.nombre_proyecto }}</h1>
+    <p><strong>Cliente:</strong> {{ proyecto.cliente }}</p>
+    <a href="/">← Volver al Tablero</a>
+
+    <div class="card" style="background-color: #eef6ff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #d1e3ff;">
+    <h3>Recursos Globales</h3>
+    
+    <form method="POST" action="/actualizar_links_globales">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="text" name="url_cotizaciones" value="{{ config.url_cotizaciones if config else '' }}" placeholder="CONSEC. COTIZACIONES" style="flex: 1; padding: 8px;">
+            <input type="text" name="url_informes" value="{{ config.url_informes if config else '' }}" placeholder="CONSEC. INFORMES" style="flex: 1; padding: 8px;">
+            <input type="text" name="url_costos" value="{{ config.url_costos if config else '' }}" placeholder="COSTOS ACTIVOS" style="flex: 1; padding: 8px;">
+            <button type="submit" style="background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px;">Actualizar Links</button>
+        </div>
+    </form>
+
+    <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #b8d4ff;">
+        <strong>Acceso rápido:</strong>
+        <ul style="list-style: none; padding: 0; display: flex; gap: 20px; margin: 10px 0 0 0;">
+            <li><a href="{{ config.url_cotizaciones if config and config.url_cotizaciones else '#' }}" target="_blank" style="color: #0056b3; font-weight: bold; text-decoration: none;">Cotizaciones</a></li>
+            <li><a href="{{ config.url_informes if config and config.url_informes else '#' }}" target="_blank" style="color: #0056b3; font-weight: bold; text-decoration: none;">Informes</a></li>
+            <li><a href="{{ config.url_costos if config and config.url_costos else '#' }}" target="_blank" style="color: #0056b3; font-weight: bold; text-decoration: none;">Costos</a></li>
+        </ul>
+    </div>
+</div>
+
+    <div class="card">
+        <h2>Información Administrativa</h2>
+        <form method="POST" action="/detalle/{{ proyecto.id }}">
+            <input type="hidden" name="form_type" value="admin">
+            <label>Fecha de Inicio:</label> <input type="date" name="fecha_inicio" value="{{ proyecto.fecha_inicio or '' }}"><br>
+            <label>Fecha de Finalización:</label> <input type="date" name="fecha_fin" value="{{ proyecto.fecha_fin or '' }}"><br>
+            <label>N° Orden de Compra:</label> <input type="text" name="orden_compra" value="{{ proyecto.orden_compra or '' }}"><br>
+            <label>N° Factura:</label> <input type="text" name="factura" value="{{ proyecto.factura or '' }}"><br>
+            <label>Estado:</label>
+            <select name="estado">
+                <option value="activo" {% if proyecto.estado == 'activo' %}selected{% endif %}>Activo</option>
+                <option value="finalizado" {% if proyecto.estado == 'finalizado' %}selected{% endif %}>Finalizado</option>
+            </select><br>
+            <button type="submit" style="background: #007bff; color: white;">Guardar Administrativo</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Gestión y Trazabilidad</h2>
+        {% if proyecto.entregables %}
+            {% set ent = proyecto.entregables[0] %}
+            <form method="POST" action="/detalle/{{ proyecto.id }}">
+                <input type="hidden" name="form_type" value="gestion">
+                <table>
+                    <tr><th>Entregable</th><th>V.B.</th><th>Fecha</th></tr>
+                    <tr><td>Costo Preliminar</td><td><input type="checkbox" name="costo_preliminar" {% if ent.costo_preliminar %}checked{% endif %}></td><td><input type="date" name="fecha_costo_preliminar" value="{{ ent.fecha_costo_preliminar.strftime('%Y-%m-%d') if ent.fecha_costo_preliminar else '' }}"></td></tr>
+                    <tr><td>Costo Final</td><td><input type="checkbox" name="costo_final" {% if ent.costo_final %}checked{% endif %}></td><td>N/A</td></tr>
+                    <tr><td>Acta Firmada</td><td><input type="checkbox" name="acta_firmada" {% if ent.acta_firmada %}checked{% endif %}></td><td><input type="date" name="fecha_acta_firmada" value="{{ ent.fecha_acta_firmada.strftime('%Y-%m-%d') if ent.fecha_acta_firmada else '' }}"></td></tr>
+                    <tr><td>Informe Técnico</td><td><input type="checkbox" name="informe_tecnico" {% if ent.informe_tecnico %}checked{% endif %}></td><td>N/A</td></tr>
+                </table>
+                <button type="submit" style="background: green; color: white;">Guardar Gestión</button>
+            </form>
+
+            <div class="seccion-links">
+                <h3>Links Relacionados</h3>
+                <form method="POST" action="/actualizar_todos_los_links/{{ proyecto.id }}">
+                    {% for link in links %}
+                        <div class="link-item">
+                            <input type="text" name="nombre_{{ link.id }}" value="{{ link.nombre_link }}">
+                            <input type="text" name="url_{{ link.id }}" value="{{ link.url }}">
+                            <a href="{{ link.url }}" target="_blank">Abrir</a>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" style="background: #28a745; color: white;">Guardar Links entregables</button>
+                </form>
+            </div>
+        {% else %}
+            <p>No hay datos de gestión.</p>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3>Control Financiero</h3>
+<form action="/actualizar_costos/{{ proyecto.id }}" method="POST">
+    <input type="hidden" name="fecha_actualizacion" value="{{ now }}">
+    
+    <label>PRESUPUESTO:</label>
+    <input type="number" name="Presupuesto" value="{{ proyecto.presupuesto or 0 }}">
+    
+    <label>COSTO ACTUAL:</label>
+    <input type="number" name="costo_ejecutado" value="{{ proyecto.costo_ejecutado or 0 }}">
+    
+    <button type="submit">Guardar Cambios Financieros</button>
+</form>
+    </div>
+
+</body>
+</html>

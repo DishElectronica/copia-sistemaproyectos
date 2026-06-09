@@ -1,0 +1,5 @@
+venv/
+copias/
+instance/
+__pycache__/
+*.pyc

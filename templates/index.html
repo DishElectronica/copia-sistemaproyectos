@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sistema de Seguimiento de Proyectos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; padding: 20px; color: #374151; }
+        .controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .tablero-clientes { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .card { background: #ffffff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #10b981; }
+        .progress-bar { width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 12px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { background-color: #10b981; height: 100%; transition: width 0.3s ease; }
+        .btn-action { padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9em; font-weight: 600; }
+        .btn-primary { background: #10b981; color: white; border: none; cursor: pointer; }
+        .btn-secondary { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>Gestión de Proyectos</h1>
+
+    <form method="POST" action="/" class="controls">
+        <input type="text" name="nombre" placeholder="Nombre Proyecto" required>
+        <input type="text" name="cliente" placeholder="Cliente" required>
+        <input type="text" name="numero_cotizacion" placeholder="N° OC/Cotización">
+        <select name="id_encargado" required>
+            <option value="">Encargado</option>
+            {% for e in encargados %}
+                <option value="{{ e.id }}">{{ e.nombre }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-action btn-primary">Crear Proyecto</button>
+    </form>
+
+    <div class="controls">
+        <a href="/exportar_csv" class="btn-action" style="background:#2563eb; color:white;"><i class="fa-solid fa-file-csv"></i> CSV</a>
+        <a href="/archivados" class="btn-action btn-secondary"><i class="fa-solid fa-box-archive"></i> Archivados</a>
+        
+        <form method="GET" action="/" style="margin-left: auto;">
+            <select name="id_encargado" onchange="this.form.submit()" style="padding: 8px; border-radius: 6px;">
+                <option value="">Filtrar por encargado...</option>
+                {% for e in encargados %}
+                    <option value="{{ e.id }}" {% if request.args.get('id_encargado')|int == e.id %}selected{% endif %}>
+                        {{ e.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+            <a href="/" style="margin-left: 10px; font-size: 0.8em;">Limpiar</a>
+        </form>
+    </div>
+    
+    <div><details style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px;">
+        <summary style="font-weight: 600; cursor: pointer; color: #1e40af; font-size: 1.1em; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa-solid fa-list-check"></i> Bitácora de Tareas Diarias</span>
+        
+            <a href="/exportar_bitacora_csv" class="btn-action" style="background:#059669; color:white; font-size: 0.7em; padding: 5px 10px; text-decoration: none;">
+                <i class="fa-solid fa-file-excel"></i> Descargar Bitácora
+           </a>
+        </summary>
+    
+
+        <form method="POST" action="/registrar_bitacora" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <select name="id_encargado" required style="padding: 8px; border-radius: 6px;">
+                <option value="">¿Quién?</option>
+                {% for e in encargados %}
+                    <option value="{{ e.id }}">{{ e.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <select name="tarea" required style="padding: 8px; border-radius: 6px; flex: 1;">
+                <option value="Revisar correo">Revisar correo</option>
+                <option value="Revisar OC WhatsApp">Revisar OC WhatsApp</option>
+                <option value="Actualizar costos">Actualizar costos</option>
+                <option value="Informes firmados">Informes firmados</option>
+                <option value="Revisar mantenimientos">Revisar mantenimientos</option>
+                <option value="Registro nuevos proyectos">Registro nuevos proyectos</option>
+                <option value="Registro nuevos proyectos">Actualizar estados de cotización REALI/NO REALI</option>
+                <option value="Otra gestión">Otra gestión</option>
+           </select>
+    
+    
+    <input type="text" name="anotacion" placeholder="Detalle..." required style="padding: 8px; border-radius: 6px; flex: 2;">
+    <button type="submit" class="btn-action btn-primary">Registrar</button>
+</form>
+<table style="width:100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9em;">
+    <thead>
+        <tr style="background: #f3f4f6; text-align: left;">
+            <th style="padding: 8px;">Quién</th> <th style="padding: 8px;">Tarea</th>
+            <th style="padding: 8px;">Nota</th>
+            <th style="padding: 8px;">Hora</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in registros_recientes %}
+        <tr>
+            <td style="padding: 8px;">{{ r.encargado.nombre if r.encargado else 'N/A' }}</td>
+            <td style="padding: 8px;">{{ r.tarea }}</td>
+            <td style="padding: 8px;">{{ r.anotacion }}</td>
+            <td style="padding: 8px;">{{ r.fecha_registro.strftime('%H:%M') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    </details>
+</div>
+    
+<div class="tablero-clientes">
+    {% for cliente, lista in proyectos_agrupados.items() %}
+    <details open style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
+        <summary style="font-weight: 600; cursor: pointer; color: #1e40af; margin-bottom: 10px;">
+            <i class="fa-solid fa-building"></i> {{ cliente }} ({{ lista|length }})
+        </summary>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+            
+            {% for p in lista %}
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <strong style="display: block;">{{ p.nombre_proyecto }}</strong>
+                        <small style="color: #6b7280;">#{{ p.numero_cotizacion or 'S/C' }}</small>
+                    </div>
+                    {% set codigos = {1: 'AX1', 2: 'AX2', 3: 'AX3', 4: 'AX4'} %}
+                    <div title="{{ p.encargado.nombre }}" style="background: #e0e7ff; color: #4338ca; width: 35px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75em; border: 1px solid #c7d2fe;">
+                        {{ codigos.get(p.encargado.id, '??') }}
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ p.progreso_total|default(0) }}%;"></div>
+                </div>
+
+                <div style="margin-top: 15px; font-size: 0.85em; border-top: 1px solid #f3f4f6; padding-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Presupuesto:</span> <strong>${{ "{:,.0f}".format(p.presupuesto or 0) }}</strong>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 5px 0;">
+                        <small style="color: #9ca3af; font-style: italic;">
+                            Actualizado: {{ p.fecha_actualizacion_costo.strftime('%d/%m/%Y') if p.fecha_actualizacion_costo else 'Nunca' }}
+                        </small>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 15px;
+                                color: {% if ((p.presupuesto or 0) - (p.costo_ejecutado or 0)) / (p.presupuesto or 1) * 100 < 0 %}red{% else %}#059669{% endif %};">
+                        <span>Utilidad %:</span>
+                        <span>
+                            {% if p.presupuesto and p.presupuesto > 0 %}
+                                {{ "%.1f"|format(((p.presupuesto - (p.costo_ejecutado or 0)) / p.presupuesto) * 100) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <a href="/detalle/{{ p.id }}" style="display: block; text-align: center; background: #28a745; color: white; padding: 8px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+                        Gestiones
+                    </a>
+                </div>
+            </div> 
+            {% endfor %} {# Fin del bucle de proyectos #}
+
+        </div> {# Fin del grid #}
+    </details> {# Fin del details #}
+    {% endfor %} {# Fin del bucle de clientes #}
+</div>
