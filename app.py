@@ -9,6 +9,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///proyectos.db'
 db = SQLAlchemy(app)
 
+            
+
 # --- MODELOS ---
 class Encargado(db.Model):
     __tablename__ = 'encargado'
@@ -108,7 +110,13 @@ def precargar_encargados():
             db.session.add(Encargado(nombre=nombre))
     db.session.commit()
 
-
+# 4. INICIALIZACIÓN (Mueve tu bloque AQUÍ, debajo de las clases)
+with app.app_context():
+    db.create_all()
+    precargar_encargados()
+    if not ConfiguracionGlobal.query.first():
+        db.session.add(ConfiguracionGlobal())
+        db.session.commit()
 
 # --- RUTAS ---
 @app.route('/', methods=['GET', 'POST'])
@@ -436,8 +444,3 @@ def exportar_finalizados_csv():
     )
 
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        precargar_encargados()
-    app.run(debug=True)
