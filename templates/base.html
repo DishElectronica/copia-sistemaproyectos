@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Seguimiento de Proyectos</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; line-height: 1.6; }
+        .container { padding: 20px; min-height: 80vh; }
+        nav { background: #333; color: #fff; padding: 1rem; }
+        nav a { color: #fff; margin-right: 15px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/">Inicio</a>
+        <a href="/proyectos">Proyectos</a>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer style="margin-top: 50px; padding: 20px; text-align: center; border-top: 1px solid #ddd; background-color: #f8f9fa;">
+        <div style="margin-bottom: 10px;">
+            <img src="{{ url_for('static', filename='logo_empresa.png') }}" alt="Logo Empresa" style="max-width: 150px;">
+        </div>
+        <p style="font-size: 0.9em; color: #666;">
+            Sistema de Seguimiento de Proyectos v1.0<br>
+            Diseñado y desarrollado por <strong>[Tu Nombre/Tu Marca]</strong> &copy; 2026
+        </p>
+    </footer>
+
+</body>
+</html>

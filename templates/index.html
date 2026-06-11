@@ -5,17 +5,94 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; padding: 20px; color: #374151; }
-        .controls { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .tablero-clientes { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
-        .card { background: #ffffff; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #10b981; }
-        .progress-bar { width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 12px; margin: 10px 0; overflow: hidden; }
-        .progress-fill { background-color: #10b981; height: 100%; transition: width 0.3s ease; }
-        .btn-action { padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9em; font-weight: 600; }
-        .btn-primary { background: #10b981; color: white; border: none; cursor: pointer; }
-        .btn-secondary { background: #6c757d; color: white; }
-    </style>
+    /* Fuente moderna aplicada a todo el cuerpo */
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Estilo amigable para tus contenedores de controles/formularios */
+    .controls { 
+        background: #ffffff; 
+        padding: 25px; 
+        border-radius: 16px; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        margin-bottom: 20px; 
+        display: flex; 
+        gap: 15px; 
+        align-items: center; 
+        flex-wrap: wrap; 
+        border: 1px solid #e5e7eb;
+    }
+
+    /* Estilo amigable para los campos de entrada */
+    input[type="text"], input[type="number"], select {
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+        border-color: #10b981;
+        outline: none;
+    }
+
+    /* Estilo del botón principal */
+    .btn-primary { 
+        background: #10b981; 
+        color: white; 
+        border: none; 
+        padding: 12px 20px; 
+        border-radius: 10px; 
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .tablero-simple {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+    margin-top: 20px;
+    }
+    
+    .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .progress-bar {
+    background: #e5e7eb;
+    height: 8px;
+    border-radius: 4px;
+    margin: 10px 0;
+    overflow: hidden;
+    }
+
+    .progress-fill {
+    background: #10b981;
+    height: 100%;
+    }
+</style>
 </head>
+<div style="position: fixed; top: 10px; right: 20px; z-index: 1000; 
+            background: rgba(255, 255, 255, 0.95); padding: 10px 25px; 
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            display: flex; align-items: center; justify-content: flex-end; 
+            border: 1px solid #ddd; height: 60px;">
+    
+    <img src="{{ url_for('static', filename='logo_empresa.png') }}" alt="Logo Empresa" 
+         style="height: 100%; width: auto; object-fit: contain;">
+</div>
+<footer style="position: fixed; bottom: 0; left: 0; width: 100%; 
+                background: #f4f7f6; padding: 5px 20px; 
+                font-size: 10px; color: #9ca3af; 
+                text-align: right; border-top: 1px solid #e5e7eb; 
+                z-index: 999;">
+    Diseñado por <strong>[Carla]</strong> | Sistema de Seguimiento
+</footer>
 <body>
 
     <h1>Gestión de Proyectos</h1>
@@ -35,7 +112,7 @@
 
     <div class="controls">
         <a href="/exportar_csv" class="btn-action" style="background:#2563eb; color:white;"><i class="fa-solid fa-file-csv"></i> CSV</a>
-        <a href="/archivados" class="btn-action btn-secondary"><i class="fa-solid fa-box-archive"></i> Archivados</a>
+        <a href="/archivados" class="btn-action btn-secondary"><i class="fa-solid fa-box-archive"></i> Finalizados</a>
         
         <form method="GET" action="/" style="margin-left: auto;">
             <select name="id_encargado" onchange="this.form.submit()" style="padding: 8px; border-radius: 6px;">
@@ -104,6 +181,9 @@
 </table>
     </details>
 </div>
+
+<div class="tablero-simple">
+    <h2>Proyectos en Curso</h2>
     
 <div class="tablero-clientes">
     {% for cliente, lista in proyectos_agrupados.items() %}
