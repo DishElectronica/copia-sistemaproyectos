@@ -46,6 +46,7 @@ class Proyecto(db.Model):
         if self.presupuesto and self.presupuesto > 0:
             return round(((self.presupuesto - self.costo_ejecutado) / self.presupuesto) * 100, 1)
         return 0
+    
 
 
 class BitacoraTareas(db.Model):
@@ -117,6 +118,14 @@ with app.app_context():
     if not ConfiguracionGlobal.query.first():
         db.session.add(ConfiguracionGlobal())
         db.session.commit()
+
+@app.after_request
+def add_header(response):
+    # Esto le dice a cualquier navegador: "No guardes nada, busca siempre lo nuevo"
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 # --- RUTAS ---
 @app.route('/', methods=['GET', 'POST'])
