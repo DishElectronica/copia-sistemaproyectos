@@ -1,0 +1,2 @@
+[2026-06-13 17:09:05.370624] Proyecto 'proyecto 1' (ID: 1) eliminado por: jose
+[2026-06-13 17:50:27.851370] Proyecto 'proyecto 2' (ID: 2) eliminado por: mu

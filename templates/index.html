@@ -2,9 +2,6 @@
 <html>
 <head>
     <title>Sistema de Seguimiento de Proyectos</title>
-    <img src="{{ url_for('static', filename='Logo_empresa.png') }}" 
-     alt="Logo Empresa" 
-     style="display: block; margin-left: auto; margin-right: 20px; width: 150px; height: auto;">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -81,55 +78,85 @@
     }
 </style>
 </head>
-
-<footer style="position: fixed; bottom: 0; left: 0; width: 100%; 
-                background: #f4f7f6; padding: 5px 20px; 
-                font-size: 10px; color: #9ca3af; 
-                text-align: right; border-top: 1px solid #e5e7eb; 
-                z-index: 999;">
-    Diseñado por <strong>[Carla]</strong> | Sistema de Seguimiento
-</footer>
 <body>
+    <footer style="position: fixed; bottom: 0; left: 0; width: 100%; 
+                   background: #f4f7f6; padding: 5px 20px; 
+                   font-size: 10px; color: #9ca3af; 
+                   text-align: right; border-top: 1px solid #e5e7eb; 
+                   z-index: 999;">
+        Diseñado por <strong>[Carla]</strong> | Sistema de Seguimiento
+    </footer>
 
-    <h1>Gestión de Proyectos</h1>
-
-    <form method="POST" action="/" class="controls">
-        <input type="text" name="nombre" placeholder="Nombre Proyecto" required>
-        <input type="text" name="cliente" placeholder="Cliente" required>
-        <input type="text" name="numero_cotizacion" placeholder="N° OC/Cotización">
-        <select name="id_encargado" required>
-            <option value="">Encargado</option>
-            {% for e in encargados %}
-                <option value="{{ e.id }}">{{ e.nombre }}</option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn-action btn-primary">Crear Proyecto</button>
-    </form>
-
-    <div class="controls">
-        <a href="/exportar_csv" class="btn-action" style="background:#2563eb; color:white;"><i class="fa-solid fa-file-csv"></i> CSV</a>
-        <a href="/archivados" class="btn-action btn-secondary"><i class="fa-solid fa-box-archive"></i> Finalizados</a>
-        
-        <form method="GET" action="/" style="margin-left: auto;">
-            <select name="id_encargado" onchange="this.form.submit()" style="padding: 8px; border-radius: 6px;">
-                <option value="">Filtrar por encargado...</option>
-                {% for e in encargados %}
-                    <option value="{{ e.id }}" {% if request.args.get('id_encargado')|int == e.id %}selected{% endif %}>
-                        {{ e.nombre }}
-                    </option>
-                {% endfor %}
-            </select>
-            <a href="/" style="margin-left: 10px; font-size: 0.8em;">Limpiar</a>
-        </form>
-    </div>
+    <script>
+        function toggleAcordeones(abrir) {
+            const detalles = document.querySelectorAll('.tablero-clientes details');
+            detalles.forEach(d => {
+                 d.open = abrir;
+            });
+        }
+    </script>
+</body>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 2px solid #f3f4f6; margin-bottom: 20px;">
     
-    <div><details style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px;">
+    <img src="{{ url_for('static', filename='Logo_empresa.png') }}" 
+         alt="Logo Empresa" 
+         style="width: 180px; height: auto; margin-right: 20px;">
+
+    <h1 style="position: absolute; left: 0; right: 0; margin: 0; text-align: center; font-size: 1.8em; color: #1e293b; pointer-events: none; z-index: 0;">
+        <h1>Gestión de Proyectos</h1>
+
+    <div style="min-width: 180px; display: flex; justify-content: flex-end;"></div>    
+        <details style="position: relative; cursor: pointer; background: #f3f4f6; padding: 10px 20px; border-radius: 50px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+            <summary style="list-style: none; font-weight: 600;">⚙️ Menú</summary>
+            <div style="position: absolute; right: 0; top: 50px; background: white; border: 1px solid #ddd; padding: 15px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.2); min-width: 200px; z-index: 1000;">
+                <a href="/exportar_bitacora_csv" style="display: block; padding: 8px 0; color: #333; text-decoration: none;">Exportar Bitácora</a>
+                <a href="/archivados" style="display: block; padding: 8px 0; color: #333; text-decoration: none;">Proy. Finalizados</a>
+                <a href="/exportar_csv" style="display: block; padding: 8px 0; color: #333; text-decoration: none;">Reporte Proyectos</a>
+                <a href="/alertas" style="display: block; padding: 8px 0; color: #d32f2f; font-weight: bold; text-decoration: none;">
+                   ⚠️ Actas Pendientes por firma  
+                </a>
+                <hr>
+                <form method="GET" action="/" style="margin: 5px 0;">
+                    <select onchange="window.location.href='/?id_encargado=' + this.value;" style="width: 100%; padding: 5px;">
+                        <option value="">Todos los Encargados</option>
+                        {% for e in encargados %}
+                            <option value="{{ e.id }}" {% if request.args.get('id_encargado')|string == e.id|string %}selected{% endif %}>
+                               {{ e.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <a href="/" style="display: block; padding: 8px 0; color: #d32f2f; text-decoration: none;">Limpiar Filtros</a>
+            </div>
+        </details>
+    </div>
+
+<form method="POST" action="/" style="background: #f9fafb; padding: 20px; border-radius: 12px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    
+    <input type="text" name="nombre" placeholder="Nombre Proyecto" required>
+    <input type="text" name="cliente" placeholder="Cliente" required>
+    <input type="text" name="numero_cotizacion" placeholder="N° OC/Cotización">
+    
+    <select name="id_encargado" required>
+        <option value="">Encargado</option>
+        {% for e in encargados %}
+            <option value="{{ e.id }}">{{ e.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" class="btn-primary" style="padding: 12px 20px; font-size: 14px; border-radius: 8px;">
+       Crear Proyecto
+    </button>
+
+    <a href="/mapa" style="padding: 12px 20px; background: #7f85ed; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 14px; display: inline-block;">
+       🗺️ Ver Mapa de Gestión
+    </a>
+
+</form>    
+    <div><details style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(16, 13, 13, 0.05); margin-bottom: 25px;">
         <summary style="font-weight: 600; cursor: pointer; color: #1e40af; font-size: 1.1em; display: flex; justify-content: space-between; align-items: center;">
             <span><i class="fa-solid fa-list-check"></i> Bitácora de Tareas Diarias</span>
-        
-            <a href="/exportar_bitacora_csv" class="btn-action" style="background:#059669; color:white; font-size: 0.7em; padding: 5px 10px; text-decoration: none;">
-                <i class="fa-solid fa-file-excel"></i> Descargar Bitácora
-           </a>
+
         </summary>
     
 
@@ -179,8 +206,21 @@
 </div>
 
 <div class="tablero-simple">
-    <h2>Proyectos en Curso</h2>
+    <div class="titulo-tablero" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="margin: 0; color: #1f2937; font-family: 'Inter', sans-serif;">Proyectos en Curso</h2>
     
+    <div style="display: flex; gap: 10px;">
+        <button onclick="toggleAcordeones(true)" 
+                style="cursor: pointer; padding: 8px 16px; border: 1px solid #e5e7eb; background: #ffffff; border-radius: 8px; font-size: 13px; font-weight: 600; color: #4b5563; transition: all 0.2s;">
+            ➕ Abrir todos
+        </button>
+        <button onclick="toggleAcordeones(false)" 
+                style="cursor: pointer; padding: 8px 16px; border: 1px solid #e5e7eb; background: #ffffff; border-radius: 8px; font-size: 13px; font-weight: 600; color: #4b5563; transition: all 0.2s;">
+            ➖ Cerrar todos
+        </button>
+    </div>
+</div>
+
 <div class="tablero-clientes">
     {% for cliente, lista in proyectos_agrupados.items() %}
     <details open style="background: white; border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;">
@@ -197,9 +237,11 @@
                         <strong style="display: block;">{{ p.nombre_proyecto }}</strong>
                         <small style="color: #6b7280;">#{{ p.numero_cotizacion or 'S/C' }}</small>
                     </div>
-                    <a href="{{ url_for('finalizar_proyecto', id=p.id) }}" title="Archivar proyecto" 
+                    <a href="{{ url_for('finalizar_proyecto', id=p.id) }}" 
+                       title="Archivar proyecto" 
+                       onclick="return confirm('¿Segura que deseas FINALIZAR este proyecto?');"
                        style="text-decoration: none; font-size: 1.2em; cursor: pointer;">
-                       ✅
+                       📁🔚
                     </a>
 
                     {% set codigos = {1: 'AX1', 2: 'AX2', 3: 'AX3', 4: 'AX4'} %}

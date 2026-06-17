@@ -4,11 +4,15 @@ from datetime import datetime, timezone
 import csv
 import io
 from collections import defaultdict
+from flask import render_template, request, redirect, url_for, flash
+from models import db, Proyecto, NotaProyecto
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///proyectos.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
+app.secret_key = 'una_clave_muy_secreta_y_larga'
 db = SQLAlchemy(app)
 
+from models import Proyecto, NotaProyecto
             
 
 # --- MODELOS ---
@@ -396,11 +400,11 @@ def exportar_csv():
     
     # Encabezados en el orden que solicitaste:
     # Cliente, Nombre Proyecto, N° Cotización, Presupuesto, Orden de Compra, Utilidad, Encargado
-    writer.writerow(['Cliente', 'Nombre Proyecto', 'N° Cotización', 'Presupuesto', 'Orden de Compra', 'Utilidad', 'Encargado']),
+    writer.writerow(['Cliente', 'Nombre Proyecto', 'N° Cotización', 'Presupuesto', 'Orden de Compra', 'Utilidad', 'Encargado', 'Fecha'])
     
     for p in proyectos:
         # Calculamos la utilidad aquí mismo (Presupuesto - Costo Ejecutado)
-        utilidad = (p.presupuesto or 0) - (p.costo_ejecutado or 0),
+        utilidad = (p.presupuesto or 0) - (p.costo_ejecutado or 0)
         fecha = p.fecha_actualizacion_costo.strftime('%Y-%m-%d') if p.fecha_actualizacion_costo else 'S/F'
 
         writer.writerow([
@@ -457,6 +461,86 @@ def exportar_finalizados_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment;filename=reporte_proyectos_finalizados.csv"}
     )
+
+@app.route('/eliminar/<int:id>', methods=['POST'])
+def eliminar_proyecto(id):
+    # Obtenemos los datos del formulario
+    usuario = request.form.get('usuario')
+    palabra = request.form.get('palabra_clave')
+    
+    proyecto = Proyecto.query.get_or_404(id)
+    
+    # Validamos que la palabra clave sea exacta
+    if palabra == "CONFIRMAR":
+        # 1. Registro de auditoría (se guardará en el servidor)
+        log_mensaje = f"[{datetime.now()}] Proyecto '{proyecto.nombre_proyecto}' (ID: {id}) eliminado por: {usuario}\n"
+        with open("log_eliminaciones.txt", "a") as f:
+            f.write(log_mensaje)
+        
+        # 2. Eliminación de la base de datos
+        db.session.delete(proyecto)
+        db.session.commit()
+        
+        flash("El proyecto fue eliminado exitosamente.")
+    else:
+        flash("Error: La palabra clave no es correcta. No se realizó ninguna acción.")
+        
+    return redirect(url_for('index'))
+
+@app.route('/alertas')
+def alertas():
+    # Buscamos proyectos 'archivado' donde el acta NO está firmada
+    pendientes = Proyecto.query.join(Entregable).filter(
+        Proyecto.estado == 'archivado',
+        Entregable.acta_firmada == False
+    ).all()
+    
+    return render_template('alertas.html', proyectos=pendientes)
+
+from sqlalchemy.orm import joinedload # Asegúrate de importar esto arriba
+
+@app.route('/mapa')
+def mapa_proyectos():
+    # Solo buscamos proyectos que NO estén archivados
+    proyectos = Proyecto.query.filter(Proyecto.estado != 'archivado')\
+                             .options(joinedload(Proyecto.encargado))\
+                             .all()
+    return render_template('mapa.html', proyectos=proyectos)
+
+from flask import request, jsonify
+# Cámbialo de esto:
+# from notas_logica import ..., borrar_base_de_dato
+
+# A esto (agregando la 's' al final):
+from notas_logica import guardar_nota_db, obtener_notas_db, marcar_como_leido, borrar_base_de_datos
+
+@app.route('/notas/<int:proyecto_id>', methods=['GET', 'POST'])
+def gestionar_notas(proyecto_id):
+    if  request.method == 'POST':
+        contenido = request.form.get('contenido', '')
+        guardar_nota_db(proyecto_id, contenido)
+        return jsonify({"status": "ok"})
+    
+    notas = obtener_notas_db(proyecto_id)
+    return jsonify(notas)
+# En tu función de creación de tabla, añade la columna 'leido'
+
+@app.route('/reset-sistema')
+def reset():
+    from notas_logica import borrar_base_de_datos
+    borrar_base_de_datos()
+    return "Base de datos eliminada. Reinicia el servidor para empezar de cero."
+
+@app.route('/notas/<int:proyecto_id>')
+def ver_notas(proyecto_id):
+    lista_notas = obtener_notas_db(proyecto_id) # Esta función ya devuelve los diccionarios
+    return render_template('notas.html', notas=lista_notas, proyecto_id=proyecto_id)
+
+@app.route('/marcar-leido/<int:nota_id>')
+def marcar(nota_id):
+    marcar_como_leido(nota_id) 
+    # Esto es lo que JavaScript espera recibir tras el fetch:
+    return jsonify({"status": "success", "message": "Nota marcada"})
 
 if __name__ == '__main__':
     app.run(debug=True)
