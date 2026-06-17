@@ -3,3 +3,4 @@ copias/
 instance/
 __pycache__/
 *.pyc
+*.db
