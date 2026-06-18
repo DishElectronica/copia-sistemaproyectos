@@ -32,11 +32,16 @@
         <div class="encargado-badge">
             👤 {{ p.encargado.nombre if p.encargado else 'Sin asignar' }}
         </div>
-        
+        <small  style="color:red;">{{ p.tiene_pendientes }}</small>
         <button onclick="abrirNotas({{ p.id }})" 
-                style="position: absolute; top: 10px; right: 10px; border: none; background: #e0e7ff; color: #4338ca; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">
+                style="position: absolute; top: 10px; right: 10px; border: none; 
+                background-color: {{ '#f87171' if p.tiene_pendientes else '#e0e7ff' }}; 
+                color: {{ '#ffffff' if p.tiene_pendientes else '#4338ca' }}; 
+                border-radius: 50%; width: 30px; height: 30px; cursor: pointer;
+                {{ 'box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);' if p.tiene_pendientes else '' }}">
             📝
         </button>
+        
 
         <div style="margin-top: 10px; font-size: 0.8em; color: #666;">Utilidad:</div>
         <div class="utilidad-valor">{{ p.porcentaje_utilidad }}%</div>
@@ -86,7 +91,9 @@ function marcarLeido(notaId) {
     fetch(`/marcar-leido/${notaId}`)
         .then(res => {
             if(res.ok) {
-                abrirNotas(currentPID); // Refresca el panel para que cambie a "Leído"
+                abrirNotas(currentPID); 
+                // Refresca el panel para que cambie a "Leído"
+            window.location.reload();
             }
         });
 }
@@ -109,6 +116,7 @@ function marcarLeido(notaId) {
                 btn.innerText = "Guardar";
                 document.getElementById('inputNota').value = '';
                 abrirNotas(currentPID); // Esto refresca la lista
+                window.location.reload();
             })
             .catch(err => {
                 btn.innerText = "Guardar";

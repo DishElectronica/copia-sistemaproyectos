@@ -1,5 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, Response
+#from notas_logica import tiene_notas_pendientes, guardar_nota_db
 from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy 
+from notas_logica import tiene_notas_pendientes, obtener_notas_db, marcar_como_leido
+# ... el resto de tus importaciones ...
 from datetime import datetime, timezone
 import csv
 import io
@@ -7,11 +11,24 @@ from collections import defaultdict
 from flask import render_template, request, redirect, url_for, flash
 from models import db, Proyecto, NotaProyecto
 
+from notas_logica import (
+    tiene_notas_pendientes, 
+    guardar_nota_db, 
+    obtener_notas_db, 
+    marcar_como_leido
+)
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
 app.secret_key = 'una_clave_muy_secreta_y_larga'
 db = SQLAlchemy(app)
 
+from notas_logica import (
+tiene_notas_pendientes, 
+guardar_nota_db, 
+obtener_notas_db, 
+marcar_como_leido
+)
 from models import Proyecto, NotaProyecto
             
 
@@ -505,14 +522,32 @@ def mapa_proyectos():
     proyectos = Proyecto.query.filter(Proyecto.estado != 'archivado')\
                              .options(joinedload(Proyecto.encargado))\
                              .all()
-    return render_template('mapa.html', proyectos=proyectos)
+    proyectos_data = []                         
+    for p in proyectos:
+
+        
+        estado = tiene_notas_pendientes(p.id)
+        p.tiene_pendientes = tiene_notas_pendientes(p.id)
+        proyectos_data.append({
+            'nombre_proyecto': p.nombre_proyecto,
+            'encargado': p.encargado,
+            'porcentaje_utilidad': p.porcentaje_utilidad,
+            'id': p.id,
+            'tiene_pendientes': estado
+        })
+    
+    
+    return render_template('mapa.html', proyectos=proyectos_data)
+
+
+
 
 from flask import request, jsonify
 # Cámbialo de esto:
 # from notas_logica import ..., borrar_base_de_dato
 
 # A esto (agregando la 's' al final):
-from notas_logica import guardar_nota_db, obtener_notas_db, marcar_como_leido, borrar_base_de_datos
+# from notas_logica import guardar_nota_db, obtener_notas_db, marcar_como_leido, borrar_base_de_datos
 
 @app.route('/notas/<int:proyecto_id>', methods=['GET', 'POST'])
 def gestionar_notas(proyecto_id):
