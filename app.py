@@ -151,6 +151,8 @@ def add_header(response):
 # --- RUTAS ---
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    proyectos_agrupados = defaultdict(list)
+
     if request.method == 'POST':
         encargado_id = request.form.get('id_encargado')
         nuevo = Proyecto(
@@ -158,6 +160,7 @@ def index():
             cliente=request.form['cliente'],
             numero_cotizacion=request.form.get('numero_cotizacion'),
             id_encargado=int(encargado_id) if encargado_id and encargado_id.isdigit() else None
+        
         )
         db.session.add(nuevo)
         db.session.commit()
@@ -169,20 +172,21 @@ def index():
 
     # 1. Lógica de filtrado por encargado
     id_filtro = request.args.get('id_encargado')
+
     query = Proyecto.query.filter_by(estado='activo')
-    
     if id_filtro and id_filtro.isdigit():
         query = query.filter_by(id_encargado=int(id_filtro))
     
     proyectos = query.all()
-    proyectos_agrupados = defaultdict(list)
+    #proyectos_agrupados = defaultdict(list)
 
     for p in proyectos:
         p.progreso_total = calcular_progreso(p)
         proyectos_agrupados[p.cliente].append(p)
-   
-    # 2. Cálculo de progreso
-    for p in proyectos:
+       
+        proyectos_agrupados[p.cliente].append(p)
+      # 2. Cálculo de progreso
+    for p in proyectos:   #corrido a la derecha
 
         entregable = Entregable.query.filter_by(proyecto_id=p.id).first()
         progreso_links = len(p.links[:3]) * 7 if p.links else 0
