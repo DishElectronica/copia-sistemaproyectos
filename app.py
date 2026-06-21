@@ -104,7 +104,7 @@ class ConfiguracionGlobal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     url_cotizaciones = db.Column(db.String(500))
     url_informes = db.Column(db.String(500))
-    url_costos = db.Column(db.String(500)) 
+    url_remisiones = db.Column(db.String(500)) 
 
 
 def calcular_progreso(proyecto):
@@ -303,7 +303,7 @@ def actualizar_links_globales():
     # Asignamos directamente los valores del formulario al objeto config
     config.url_cotizaciones = request.form.get('url_cotizaciones')
     config.url_informes = request.form.get('url_informes')
-    config.url_costos = request.form.get('url_costos')
+    config.url_remisiones = request.form.get('url_remisiones')
     
     # FORZAR EL GUARDADO
     db.session.flush() 
@@ -421,7 +421,7 @@ def exportar_csv():
     
     # Encabezados en el orden que solicitaste:
     # Cliente, Nombre Proyecto, N° Cotización, Presupuesto, Orden de Compra, Utilidad, Encargado
-    writer.writerow(['Cliente', 'Nombre Proyecto', 'N° Cotización', 'Presupuesto', 'Orden de Compra', 'Utilidad', 'Encargado', 'Fecha'])
+    writer.writerow(['Cliente', 'Nombre Proyecto', 'N° Cotización', 'Presupuesto','Costo Ejecutado', 'Orden de Compra', 'Utilidad', 'Encargado', 'Fecha'])
     
     for p in proyectos:
         # Calculamos la utilidad aquí mismo (Presupuesto - Costo Ejecutado)
@@ -433,6 +433,7 @@ def exportar_csv():
             p.nombre_proyecto,
             p.numero_cotizacion or 'S/C',
             p.presupuesto or 0,
+            p.costo_ejecutado or 0,
             p.orden_compra or 'S/A', # Asegúrate que este campo exista en tu modelo
             utilidad,
             p.encargado.nombre if p.encargado else 'Sin asignar',
@@ -458,7 +459,7 @@ def exportar_finalizados_csv():
     
     writer.writerow([
         'Cliente', 'Nombre Proyecto', 'N° Cotización', 'Presupuesto', 
-        'Orden de Compra', 'Utilidad', 'Encargado', 'Fecha Finalizado'
+         'Costo Ejecutado'   'Orden de Compra', 'Utilidad', 'Encargado', 'Fecha Finalizado'
     ])
 
     for p in proyectos:
@@ -470,6 +471,7 @@ def exportar_finalizados_csv():
             p.nombre_proyecto,
             p.numero_cotizacion or 'S/C',
             p.presupuesto or 0,
+            p.costo_ejecutado or 0,
             p.orden_compra or 'S/A',
             utilidad,
             p.encargado.nombre if p.encargado else 'Sin asignar',

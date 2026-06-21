@@ -259,11 +259,17 @@
                         <span>Presupuesto:</span> <strong>${{ "{:,.0f}".format(p.presupuesto or 0) }}</strong>
                     </div>
                     
-                    <div style="text-align: center; margin: 5px 0;">
-                        <small style="color: #9ca3af; font-style: italic;">
-                            Actualizado: {{ p.fecha_actualizacion_costo.strftime('%d/%m/%Y') if p.fecha_actualizacion_costo else 'Nunca' }}
-                        </small>
-                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: #f9fafb; padding: 6px 8px; border-radius: 4px; margin-bottom: 5px; font-size: 0.9em; gap: 10px;">
+    
+                        <div style="color: hwb(351 13% 77%); flex-shrink: 1; overflow: hidden;">
+                        <span style="font-weight: bold;">Costos:  </span> 
+                        ${{ "{:,.0f}".format(p.costo_ejecutado or 0) }}
+                        </div>
+    
+                        <div style="color: #2a3852; font-size: 0.85em; white-space: nowrap;">
+                           {{ p.fecha_actualizacion_costo.strftime('%d/%m/%y') if p.fecha_actualizacion_costo else 'S/F' }}
+                        </div>
+                </div>
 
                     <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 15px;
                                 color: {% if ((p.presupuesto or 0) - (p.costo_ejecutado or 0)) / (p.presupuesto or 1) * 100 < 0 %}red{% else %}#059669{% endif %};">
