@@ -45,3 +45,12 @@ CREATE TABLE IF NOT EXISTS links_proyectos (
     url TEXT,
     FOREIGN KEY (id_proyecto) REFERENCES proyectos(id)
 );
+CREATE TABLE IF NOT EXISTS notas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    proyecto_id INTEGER,
+    contenido TEXT,
+    leido INTEGER DEFAULT 0,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (proyecto_id) REFERENCES proyectos(id)
+);
+

@@ -23,12 +23,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
 app.secret_key = 'una_clave_muy_secreta_y_larga'
 db = SQLAlchemy(app)
 
-from notas_logica import (
-tiene_notas_pendientes, 
-guardar_nota_db, 
-obtener_notas_db, 
-marcar_como_leido
-)
+from notas_logica import tiene_notas_pendientes, guardar_nota_db, obtener_notas_db, marcar_como_leido
+
 from models import Proyecto, NotaProyecto
             
 
@@ -97,8 +93,7 @@ class LinkProyecto(db.Model):
     proyecto_id = db.Column(db.Integer, db.ForeignKey('proyecto.id'), nullable=False)
     nombre_link = db.Column(db.String)
     url = db.Column(db.String(500))
-    # No necesitamos 'cumplido' necesariamente si cada vez que agregas
-    # uno nuevo asumimos que cuenta para el 5% (máximo 3).
+    
     
 class ConfiguracionGlobal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -295,6 +290,8 @@ def actualizar_links_globales():
     config = ConfiguracionGlobal.query.first()
     if not config:
         config = ConfiguracionGlobal()
+
+
         db.session.add(config)
     
     
@@ -572,10 +569,17 @@ def reset():
     borrar_base_de_datos()
     return "Base de datos eliminada. Reinicia el servidor para empezar de cero."
 
+
 @app.route('/notas/<int:proyecto_id>')
 def ver_notas(proyecto_id):
     lista_notas = obtener_notas_db(proyecto_id) # Esta función ya devuelve los diccionarios
+   
+    template_path = os.path.join(app.root_path, 'templates', 'notas.html')
+    print(f"--- FLASK ESTÁ BUSCANDO EL HTML AQUÍ: {template_path} ---")
+
     return render_template('notas.html', notas=lista_notas, proyecto_id=proyecto_id)
+    
+
 
 @app.route('/marcar-leido/<int:nota_id>')
 def marcar(nota_id):

@@ -15,10 +15,7 @@ def borrar_base_de_datos():
 
 def obtener_conexion():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    db_path = os.path.join(base_dir, NOMBRE_DB)
-    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sistema_limpio.db')
-    
-    
+    db_path = os.path.join(base_dir, 'sistema_limpio.db')
     conn = sqlite3.connect(db_path)
     
     # CORRECCIÓN: 'leido' en lugar de 'lceido'
@@ -26,8 +23,14 @@ def obtener_conexion():
                     (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                      proyecto_id INTEGER, 
                      contenido TEXT, 
-                     leido INTEGER DEFAULT 0, 
-                     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+                     leido INTEGER DEFAULT 0)''')
+                    
+    try:
+        conn.execute('ALTER TABLE notas ADD COLUMN fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # La columna ya existe, no hacemos nada
+    
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -35,17 +38,19 @@ def guardar_nota_db(proyecto_id, contenido):
     conn = obtener_conexion()
     conn.execute('INSERT INTO notas (proyecto_id, contenido) VALUES (?, ?)', (proyecto_id, contenido))
     conn.commit()
-    conn.close()
 
+    
 def obtener_notas_db(proyecto_id):
     conn = obtener_conexion()
-    notas = conn.execute('''
-        SELECT * FROM notas 
-        WHERE proyecto_id = ? 
-        ORDER BY fecha_creacion DESC
-    ''', (proyecto_id,)).fetchall()
+    cursor = conn.execute('SELECT * FROM notas WHERE proyecto_id = ? ORDER BY fecha_creacion DESC', (proyecto_id,))
     
-    resultado = [dict(n) for n in notas]
+    # Esto es más seguro para obtener los nombres de las columnas
+    columnas = [description[0] for description in cursor.description]
+    notas = cursor.fetchall()
+    
+    # Crear lista de diccionarios manualmente
+    resultado = [dict(zip(columnas, fila)) for fila in notas]
+    
     conn.close()
     return resultado
 
