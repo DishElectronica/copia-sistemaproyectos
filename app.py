@@ -163,6 +163,14 @@ with app.app_context():
         db.session.add(ConfiguracionGlobal())
         db.session.commit()
 
+app.register_blueprint(notas_bp)
+
+
+with app.app_context():
+    db.create_all()
+    precargar_datos()
+
+
 @app.after_request
 def add_header(response):
     # Esto le dice a cualquier navegador: "No guardes nada, busca siempre lo nuevo"
