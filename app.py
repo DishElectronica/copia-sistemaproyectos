@@ -41,7 +41,8 @@ app.secret_key = 'una_clave_muy_secreta_y_larga'
 
 #DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres"
 # Usamos la IP fija para evitar la resolución a IPv6 problemática
-DATABASE_URL = "postgresql://postgres:CarlaFR2026++@34.176.108.182:5432/postgres"
+# Usamos el puerto 5432 (puerto directo) y parámetros adicionales para estabilidad
+DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres?sslmode=require"
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
