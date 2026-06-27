@@ -12,3 +12,7 @@ packaging==26.2
 SQLAlchemy==2.0.50
 typing_extensions==4.15.0
 Werkzeug==3.1.8
+flask
+flask-sqlalchemy
+psycopg2-binary
+gunicorn
