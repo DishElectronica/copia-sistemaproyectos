@@ -1,29 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, Response
 #from notas_logica import tiene_notas_pendientes, guardar_nota_db
 from flask_sqlalchemy import SQLAlchemy 
-import os
+from notas_logica import tiene_notas_pendientes, obtener_notas_db, marcar_como_leido
+# ... el resto de tus importaciones ...
 from datetime import datetime, timezone
+import os
 from sqlalchemy import create_engine
 import csv
 import io
+
 from collections import defaultdict
+from flask import render_template, request, redirect, url_for, flash
 
-from notas_logica import tiene_notas_pendientes, obtener_notas_db, marcar_como_leido
-from notas_blueprint import notas_bp
-# ... el resto de tus importaciones ...
-#from datetime import datetime, timezone
-#import os
-#from sqlalchemy import create_engine
-#import csv
-#import io
-#from collections import defaultdict
+DATABASE_URL = os.environ.get("DATABASE_URL") or 'sqlite:///database.db'
 
-#from flask import render_template, request, redirect, url_for, flash
-
-#DATABASE_URL = os.environ.get("DATABASE_URL") or 'sqlite:///database.db'
-
-#engine = create_engine(DATABASE_URL)
-
+engine = create_engine(DATABASE_URL)
 
 from notas_logica import (
     tiene_notas_pendientes, 
@@ -33,26 +24,11 @@ from notas_logica import (
 )
 
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
 app.secret_key = 'una_clave_muy_secreta_y_larga'
-#db = SQLAlchemy(app)
-
-#app.register_blueprint(notas_bp)
-
-#DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres"
-# Usamos la IP fija para evitar la resolución a IPv6 problemática
-# Usamos el puerto 5432 (puerto directo) y parámetros adicionales para estabilidad
-DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres?sslmode=require"
-
-
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recomendado para evitar alertas
-
-
 db = SQLAlchemy(app)
-app.register_blueprint(notas_bp)
 
-#from notas_logica import tiene_notas_pendientes, guardar_nota_db, obtener_notas_db, marcar_como_leido
+from notas_logica import tiene_notas_pendientes, guardar_nota_db, obtener_notas_db, marcar_como_leido
 
 
             
@@ -163,14 +139,6 @@ with app.app_context():
     if not ConfiguracionGlobal.query.first():
         db.session.add(ConfiguracionGlobal())
         db.session.commit()
-
-app.register_blueprint(notas_bp)
-
-
-with app.app_context():
-    db.create_all()
-    precargar_datos()
-
 
 @app.after_request
 def add_header(response):
