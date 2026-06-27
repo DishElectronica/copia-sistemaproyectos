@@ -24,7 +24,18 @@ from notas_logica import (
 )
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if not DATABASE_URL:
+    raise ValueError("¡ERROR: No se encontró la variable DATABASE_URL!")
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+
+
+
+
 app.secret_key = 'una_clave_muy_secreta_y_larga'
 db = SQLAlchemy(app)
 
