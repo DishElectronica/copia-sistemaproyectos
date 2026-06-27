@@ -33,12 +33,14 @@
             👤 {{ p.encargado.nombre if p.encargado else 'Sin asignar' }}
         </div>
         <small  style="color:red;">{{ p.tiene_pendientes }}</small>
-        <button onclick="abrirNotas({{ p.id }})" 
+        <button id="btn-nota-{{ p.id }}" 
+                onclick="abrirNotas({{ p.id }})" 
                 style="position: absolute; top: 10px; right: 10px; border: none; 
                 background-color: {{ '#f87171' if p.tiene_pendientes else '#e0e7ff' }}; 
                 color: {{ '#ffffff' if p.tiene_pendientes else '#4338ca' }}; 
                 border-radius: 50%; width: 30px; height: 30px; cursor: pointer;
-                {{ 'box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);' if p.tiene_pendientes else '' }}">
+                {{ 'box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);' if p.tiene_pendientes else '' }}
+                transition: background-color 0.3s ease, color 0.3s ease;">
             📝
         </button>
         
@@ -65,39 +67,51 @@
     let currentPID = null;
 
     function abrirNotas(id) {
-    currentPID = id;
-    document.getElementById('panelNotas').style.display = 'block';
-    
-    fetch(`/notas/${id}`)
+        currentPID = id;
+        document.getElementById('panelNotas').style.display = 'block';
+        
+        fetch(`/notas/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                const lista = document.getElementById('listaNotas');
+                lista.innerHTML = data.map(n => `
+                    <div style="border-bottom:1px solid #eee; margin-bottom:5px; padding:5px;">
+                        ${n.contenido}
+                        <br>
+                        ${n.leido === 1 ? 
+                            '<span style="color: green; font-size: 0.8em;">✓ Leído</span>' : 
+                            `<button onclick="marcarLeido(${n.id})" style="font-size:0.7em; cursor:pointer;">Marcar leído</button>`
+                        }
+                    </div>
+                `).join('');
+            });
+    }
+    function marcarLeido(notaId) {
+    fetch(`/marcar-leido/${notaId}`)
         .then(res => res.json())
         .then(data => {
-            const lista = document.getElementById('listaNotas');
-            // Aquí añadimos la lógica para mostrar el botón de "Leído" dinámicamente
-            lista.innerHTML = data.map(n => `
-                <div style="border-bottom:1px solid #eee; margin-bottom:5px; padding:5px;">
-                    ${n.contenido}
-                    <br>
-                    ${n.leido === 1 ? 
-                        '<span style="color: green; font-size: 0.8em;">✓ Leído</span>' : 
-                        `<button onclick="marcarLeido(${n.id})" style="font-size:0.7em; cursor:pointer;">Marcar leído</button>`
+            if(data.status === "success") {
+                // Aquí está la magia: el color depende de lo que diga el servidor, 
+                // no de lo que el usuario acaba de hacer.
+                const btn = document.getElementById(`btn-nota-${currentPID}`);
+                if (btn) {
+                    if (data.tiene_pendientes) {
+                        // Aún quedan notas, el botón se queda en ROJO
+                        btn.style.backgroundColor = '#f87171';
+                        btn.style.color = '#ffffff';
+                        btn.style.boxShadow = '0 0 8px rgba(248, 113, 113, 0.6)';
+                    } else {
+                        // Ya no quedan notas, el botón se pone AZUL
+                        btn.style.backgroundColor = '#e0e7ff';
+                        btn.style.color = '#4338ca';
+                        btn.style.boxShadow = 'none';
                     }
-                </div>
-            `).join('');
-        });
-}
-
-// Nueva función para el botón
-function marcarLeido(notaId) {
-    fetch(`/marcar-leido/${notaId}`)
-        .then(res => {
-            if(res.ok) {
-                abrirNotas(currentPID); 
-                // Refresca el panel para que cambie a "Leído"
-            window.location.reload();
+                }
+                abrirNotas(currentPID); // Refresca la lista
             }
         });
 }
-    
+   
 
     function enviarNota() {
         const contenido = document.getElementById('inputNota').value;
@@ -106,7 +120,6 @@ function marcarLeido(notaId) {
         const formData = new FormData();
         formData.append('contenido', contenido);
 
-        // Cambiamos el texto del botón para feedback
         const btn = document.querySelector('button[onclick="enviarNota()"]');
         btn.innerText = "Guardando...";
 
@@ -115,8 +128,14 @@ function marcarLeido(notaId) {
             .then(data => {
                 btn.innerText = "Guardar";
                 document.getElementById('inputNota').value = '';
-                abrirNotas(currentPID); // Esto refresca la lista
-                window.location.reload();
+                abrirNotas(currentPID);
+               
+                const btnMapa = document.getElementById(`btn-nota-${currentPID}`);
+                if (btnMapa) {
+                btnMapa.style.backgroundColor = '#f87171'; // Rojo
+                btnMapa.style.color = '#ffffff';
+                btnMapa.style.boxShadow = '0 0 8px rgba(248, 113, 113, 0.6)';
+            }
             })
             .catch(err => {
                 btn.innerText = "Guardar";

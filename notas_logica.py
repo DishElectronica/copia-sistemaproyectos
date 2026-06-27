@@ -54,13 +54,28 @@ def obtener_notas_db(proyecto_id):
     conn.close()
     return resultado
 
-
-def marcar_como_leido(nota_id): # Cambiamos proyecto_id por nota_id
+def marcar_como_leido(nota_id):
     conn = obtener_conexion()
-    # Ahora actualizamos basándonos en el ID único de la nota
+    
+    # 1. Primero, obtenemos el project_id al que pertenece esta nota antes de borrarla/marcarla
+    proyecto = conn.execute('SELECT proyecto_id FROM notas WHERE id = ?', (nota_id,)).fetchone()
+    proyecto_id = proyecto[0] if proyecto else None
+    
+    # 2. Marcamos como leída
     conn.execute('UPDATE notas SET leido = 1 WHERE id = ?', (nota_id,))
     conn.commit()
-    conn.close()    
+    
+    # 3. Verificamos si quedan pendientes en ese proyecto
+    # Buscamos si hay alguna nota con leido = 0 para este proyecto
+    pendientes = conn.execute('SELECT COUNT(*) FROM notas WHERE proyecto_id = ? AND leido = 0', (proyecto_id,)).fetchone()
+    tiene_pendientes = pendientes[0] > 0
+    
+    conn.close()
+    
+    # Retornamos el valor booleano
+    return tiene_pendientes
+
+
 
 def tiene_notas_pendientes(proyecto_id):
     conn = obtener_conexion()

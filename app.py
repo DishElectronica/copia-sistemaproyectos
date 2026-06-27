@@ -1,15 +1,29 @@
 from flask import Flask, render_template, request, redirect, url_for, Response
 #from notas_logica import tiene_notas_pendientes, guardar_nota_db
-from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy import SQLAlchemy 
-from notas_logica import tiene_notas_pendientes, obtener_notas_db, marcar_como_leido
-# ... el resto de tus importaciones ...
+import os
 from datetime import datetime, timezone
+from sqlalchemy import create_engine
 import csv
 import io
 from collections import defaultdict
-from flask import render_template, request, redirect, url_for, flash
-from models import db, Proyecto, NotaProyecto
+
+from notas_logica import tiene_notas_pendientes, obtener_notas_db, marcar_como_leido
+from notas_blueprint import notas_bp
+# ... el resto de tus importaciones ...
+#from datetime import datetime, timezone
+#import os
+#from sqlalchemy import create_engine
+#import csv
+#import io
+#from collections import defaultdict
+
+#from flask import render_template, request, redirect, url_for, flash
+
+#DATABASE_URL = os.environ.get("DATABASE_URL") or 'sqlite:///database.db'
+
+#engine = create_engine(DATABASE_URL)
+
 
 from notas_logica import (
     tiene_notas_pendientes, 
@@ -19,13 +33,24 @@ from notas_logica import (
 )
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sistema_limpio.db'
 app.secret_key = 'una_clave_muy_secreta_y_larga'
+#db = SQLAlchemy(app)
+
+#app.register_blueprint(notas_bp)
+
+DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres"
+
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recomendado para evitar alertas
+'
+
 db = SQLAlchemy(app)
+app.register_blueprint(notas_bp)
 
-from notas_logica import tiene_notas_pendientes, guardar_nota_db, obtener_notas_db, marcar_como_leido
+#from notas_logica import tiene_notas_pendientes, guardar_nota_db, obtener_notas_db, marcar_como_leido
 
-from models import Proyecto, NotaProyecto
+
             
 
 # --- MODELOS ---
@@ -525,6 +550,7 @@ def mapa_proyectos():
     proyectos = Proyecto.query.filter(Proyecto.estado != 'archivado')\
                              .options(joinedload(Proyecto.encargado))\
                              .all()
+    db.session.expire_all()
     proyectos_data = []                         
     for p in proyectos:
 
@@ -582,10 +608,14 @@ def ver_notas(proyecto_id):
 
 
 @app.route('/marcar-leido/<int:nota_id>')
-def marcar(nota_id):
-    marcar_como_leido(nota_id) 
-    # Esto es lo que JavaScript espera recibir tras el fetch:
-    return jsonify({"status": "success", "message": "Nota marcada"})
+def marcar_leido_route(nota_id):
+    # Llamamos a la función lógica que ahora nos dice si quedan pendientes
+    aun_quedan = marcar_como_leido(nota_id)
+    
+    # Enviamos la respuesta que tu JavaScript está esperando
+    return jsonify({"status": "success", "tiene_pendientes": aun_quedan})
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
