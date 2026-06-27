@@ -39,7 +39,10 @@ app.secret_key = 'una_clave_muy_secreta_y_larga'
 
 #app.register_blueprint(notas_bp)
 
-DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres"
+#DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supabase.co:5432/postgres"
+# Usamos la IP fija para evitar la resolución a IPv6 problemática
+DATABASE_URL = "postgresql://postgres:CarlaFR2026++@34.176.108.182:5432/postgres"
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recomendado para evitar alertas
