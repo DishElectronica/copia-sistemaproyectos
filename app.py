@@ -43,7 +43,7 @@ DATABASE_URL = "postgresql://postgres:CarlaFR2026++@db.rbhafdjkdqpijrzuyeeq.supa
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # Recomendado para evitar alertas
-'
+
 
 db = SQLAlchemy(app)
 app.register_blueprint(notas_bp)
