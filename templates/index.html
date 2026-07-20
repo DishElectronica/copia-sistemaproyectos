@@ -271,11 +271,7 @@
                         </div>
     
                         <div style="color: #2a3852; font-size: 0.85em; white-space: nowrap;">
-                            {% if p.fecha_actualizacion_costo %}
-                                {{ p.fecha_actualizacion_costo }}
-                            {% else %}
-                               S/F
-                            {% endif %}
+                           {{ p.fecha_actualizacion_costo if p.fecha_actualizacion_costo else 'S/F' }}
                         </div>
                 </div>
 
