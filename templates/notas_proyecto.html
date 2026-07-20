@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bitácora {{ proyecto_id }}</title>
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; padding: 20px; line-height: 1.4; color: #000; }
+        
+        /* Esto hace que cada bloque de nota se separe con un espacio simple */
+        .nota-bloque {
+            margin-bottom: 30px;
+            white-space: pre-wrap; /* Esto respeta los saltos de línea */
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Bitácora Proyecto: {{ proyecto_id }}</h1>
+
+    {% for nota in notas %}
+    <div class="nota-bloque">
+        <div>{{ nota.contenido }}</div>
+        <div style="font-size: 0.8em; color: #555; margin-top: 5px;">
+            {{ nota.fecha_creacion }} - {{ 'Leído' if nota.leido == 1 else 'Pendiente' }}
+        </div>
+    </div>
+    {% endfor %}
+
+    <button onclick="window.print()">Imprimir</button>
+
+</body>
+</html>

@@ -92,6 +92,10 @@
 
     <hr style="margin: 25px 0;">
 
+    <h3>Estás viendo el proyecto con ID: {{ nombre_proyecto }}</h3>
+
+
+
     <div class="agregar-link">
         <h4>Agregar nuevo link</h4>
         <form method="POST" action="/agregar_link_proyecto/{{ proyecto.id }}">
@@ -112,13 +116,11 @@
     <div class="card">
         <h3>Control Financiero</h3>
 <form action="/actualizar_costos/{{ proyecto.id }}" method="POST">
-    <input type="hidden" name="fecha_actualizacion" value="{{ now }}">
-    
     <label>PRESUPUESTO:</label>
-    <input type="number" name="Presupuesto" value="{{ proyecto.presupuesto or 0 }}">
-    
+    <input type="number" name="presupuesto" step="0.01" value="{{ proyecto.presupuesto or 0.0 }}">
+
     <label>COSTO ACTUAL:</label>
-    <input type="number" name="costo_ejecutado" value="{{ proyecto.costo_ejecutado or 0 }}">
+    <input type="number" name="costo_ejecutado" step="0.01" value="{{ proyecto.costo_ejecutado or 0.0 }}">
     
     <button type="submit">Guardar Cambios Financieros</button>
 </form>

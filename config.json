@@ -1,0 +1,6 @@
+{
+    "supabase_url": "https://rbhafdjkdqpijrzuyeeq.supabase.co",
+    "supabase_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJiaGFmZGprZHFwaWpyenV5ZWVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzAwMjIsImV4cCI6MjA5Njk0NjAyMn0.VAHqTuFHbLPer88ulL-BQAjvcPQSfCl-lGBVFZJWEp0",
+    "nombre_tabla_bitacora": "bitacora_tareas",
+    "max_documentos_por_proyecto": 3
+}

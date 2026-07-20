@@ -1,34 +1,37 @@
 <!DOCTYPE html>
-<html>
-<body>
-    <h1>Mis Notas</h1>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bitácora de Proyecto</title>
     
-    {% for nota in notas %}
-        <div style="border: 1px solid #ccc; margin: 10px; padding: 10px; border-radius: 8px;">
-            <p style="font-size: 1.1em; margin-bottom: 5px;">{{ nota.contenido }}</p>
-            
-            <pre>Datos brutos de la nota: {{ nota }}</pre>
+</head>
+<body>
 
-            <small style="color: blue; font-weight: bold;">
-                ¡PRUEBA: La fecha debería aparecer aquí abajo! 
-                {{ nota.fecha_creacion }} 
-                <--- ¿Ves algo aquí?
-            </small>
-            
+    <div class="contenedor-notas">
+        <h1>Notas del Proyecto</h1>
+        
+        {% if notas %}
+            {% for nota in notas %}
+                <div class="nota-tarjeta">
+                    <span class="fecha">Registrado el: {{ nota.fecha_creacion }}</span>
+                    
+                    <div class="contenido">
+                        <p>{{ nota.contenido }}</p>
+                    </div>
 
-            <div style="margin-top: 10px;">
-                {% if nota.leido == 1 %}
-                    <span style="color: green; font-weight: bold;">✓ LEÍDO</span>
-                {% else %}
-                    <p style="margin: 5px 0; color: #d97706;">Estado: PENDIENTE</p>
-                    <a href="/marcar-leido/{{ nota.id }}">
-                        <button style="background-color: #2563eb; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-                            Marcar como leído
-                        </button>
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    {% endfor %}
+                    <div style="margin-top: 15px;">
+                        {% if nota.leido == 1 %}
+                            <span style="color: green; font-weight: bold;">✓ LEÍDO</span>
+                        {% else %}
+                            <a href="/marcar-leido/{{ nota.id }}" class="boton-leido">Marcar como leído</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No se encontraron notas en la lista.</p>
+        {% endif %}
+    </div>
+
 </body>
 </html>
