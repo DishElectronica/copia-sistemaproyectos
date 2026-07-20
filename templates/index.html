@@ -271,7 +271,15 @@
                         </div>
     
                         <div style="color: #2a3852; font-size: 0.85em; white-space: nowrap;">
-                           {{ p.fecha_actualizacion_costo.strftime('%d/%m/%y') if p.fecha_actualizacion_costo else 'S/F' }}
+                            {% if p.fecha_actualizacion_costo %}
+                                {% if p.fecha_actualizacion_costo.strftime %}
+                                   {{ p.fecha_actualizacion_costo.strftime('%d/%m/%y') }}
+                                {% else %}
+                                  {{ p.fecha_actualizacion_costo }}
+                                {% endif %}
+                            {% else %}
+                               S/F
+                            {% endif %}
                         </div>
                 </div>
 
