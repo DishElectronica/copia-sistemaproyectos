@@ -201,7 +201,7 @@
             <td style="padding: 8px;">{{ r.encargado.nombre if r.encargado else 'N/A' }}</td>
             <td style="padding: 8px;">{{ r.tarea }}</td>
             <td style="padding: 8px;">{{ r.anotacion }}</td>
-            <td style="padding: 8px;">{{ r.fecha_registro.strftime('%H:%M') }}</td>
+            <td style="padding: 8px;">{{ r.fecha_registro if r.fecha_registro else 'S/F' }}</td>
         </tr>
         {% endfor %}
     </tbody>
